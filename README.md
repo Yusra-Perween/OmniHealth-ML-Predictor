@@ -12,21 +12,22 @@ project is to demonstrate the practical application of ML models in healthcare.
 ## Key Features
 - ML-based disease prediction
 - Multiple trained models for different health conditions
-- Flask-powered web interface
+- Streamlit-powered interactive web dashboard
 - Clean and modular Python code structure
 
 ## Technologies Used
 - Python
-- Flask
+- Streamlit
 - Pandas & NumPy
 - Scikit-learn
 - Joblib
+- Plotly & Seaborn (for data visualization)
 
 ## Project Structure
-- `app.py` – Main Flask application
-- `train_model.py` – Model training logic
-- `datasets/` – CSV files used for training
-- `models/` – Saved trained ML models
+- `app.py` – Main Streamlit application
+- `train_model.py` & `train_heart_model.py` – Model training logic
+- `*.csv` – Datasets used for training and dashboard visualization
+- `*.pkl` – Saved trained ML models
 - `requirements.txt` – Project dependencies
 
 ## How to Run the Project
@@ -34,7 +35,7 @@ project is to demonstrate the practical application of ML models in healthcare.
    `pip install -r requirements.txt`
 
 2. Run the application  
-   `python app.py`
+   `streamlit run app.py`
 
 ## Note
 This project is created for learning and academic purposes and is not intended
