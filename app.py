@@ -17,6 +17,12 @@ st.title("🩺 SmartRx - Your Personal Health Assistant")
 
 # Sidebar Input Function
 def user_input_features():
+    """
+    Collects user health data via Streamlit sidebar inputs.
+    
+    Returns:
+        pd.DataFrame: A single-row DataFrame containing the collected features.
+    """
     st.sidebar.header("📝 Enter Health Details")
     pregnancies = st.sidebar.number_input("Pregnancies", 0, 20, 1)
     glucose = st.sidebar.slider("Glucose Level", 0, 200, 100)
@@ -41,6 +47,12 @@ def user_input_features():
 
 # Save user input to history CSV
 def save_history(data):
+    """
+    Saves the user input data to a local CSV file with a timestamp.
+    
+    Args:
+        data (dict): A dictionary of health metrics submitted by the user.
+    """
     data['Date'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     df = pd.DataFrame([data])
     file_exists = os.path.isfile('health_history.csv')
@@ -48,6 +60,15 @@ def save_history(data):
 
 # Early Disease Detection
 def detect_early_disease(features):
+    """
+    Analyzes health features for early signs of common medical risks.
+    
+    Args:
+        features (pd.DataFrame): The user's input health features.
+        
+    Returns:
+        str: A formatted string containing early warnings, or a success message.
+    """
     warnings = []
 
     if features['Glucose'][0] > 140:
@@ -71,6 +92,16 @@ def detect_early_disease(features):
 
 # Smart Diet Suggestions
 def suggest_diet(glucose, bmi):
+    """
+    Provides dietary suggestions based on glucose level and BMI.
+    
+    Args:
+        glucose (float): The user's glucose level.
+        bmi (float): The user's Body Mass Index.
+        
+    Returns:
+        list: A list of actionable dietary recommendations.
+    """
     if glucose > 140 or bmi > 30:
         return [
             "🥦 Eat more vegetables & fiber-rich foods",
