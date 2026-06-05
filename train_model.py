@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
 
 # Step 1: Load data
-data = pd.read_csv("health_data.csv")  # real dataset
+data = pd.read_csv("data/health_data.csv")  # real dataset
 
 # Step 2: Features and target
 X = data.drop("Outcome", axis=1)
@@ -18,6 +18,6 @@ model = RandomForestClassifier()
 model.fit(X_train, y_train)
 
 # Step 5: Save trained model
-dump(model, "health_model.pkl")
+dump(model, "models/health_model.pkl")
 
-print("✅ Model trained on real data and saved as health_model.pkl")
+print("✅ Model trained on real data and saved as models/health_model.pkl")

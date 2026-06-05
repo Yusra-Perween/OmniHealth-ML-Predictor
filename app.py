@@ -12,7 +12,7 @@ import plotly.express as px
 @st.cache_resource
 def load_ml_model():
     try:
-        return load("health_model.pkl")
+        return load("models/health_model.pkl")
     except Exception as e:
         st.error(f"⚠️ Critical Error: Could not load the machine learning model. Details: {e}")
         return None
@@ -63,8 +63,8 @@ def save_history(data):
     """
     data['Date'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     df = pd.DataFrame([data])
-    file_exists = os.path.isfile('health_history.csv')
-    df.to_csv('health_history.csv', mode='a', header=not file_exists, index=False)
+    file_exists = os.path.isfile('data/health_history.csv')
+    df.to_csv('data/health_history.csv', mode='a', header=not file_exists, index=False)
 
 # Early Disease Detection
 def detect_early_disease(features):
@@ -167,7 +167,7 @@ with tab4:
     st.title("📊 Health Insights Dashboard")
 
     try:
-        df = pd.read_csv("health_data.csv")
+        df = pd.read_csv("data/health_data.csv")
 
         st.markdown("### 📌 Dataset Overview")
         st.dataframe(df.head())
@@ -217,7 +217,7 @@ with tab5:
     st.subheader("📜 Your Last 10 Records")
     try:
         save_history(input_df.iloc[0].to_dict())
-        history_df = pd.read_csv("health_history.csv")
+        history_df = pd.read_csv("data/health_history.csv")
         st.dataframe(history_df.tail(10))
     except Exception as e:
         st.warning("No history found or error reading file.")

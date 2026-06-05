@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
 # Load dataset
-df = pd.read_csv("heart.csv")
+df = pd.read_csv("data/heart.csv")
 
 # Drop unnecessary columns if present
 if 'id' in df.columns:
@@ -39,7 +39,7 @@ accuracy = accuracy_score(y_test, y_pred)
 print("✅ Model Accuracy:", accuracy)
 
 # Save model
-with open("heart_model.pkl", "wb") as f:
+with open("models/heart_model.pkl", "wb") as f:
     pickle.dump(model, f)
 
-print("✅ heart_model.pkl saved successfully.")
+print("✅ models/heart_model.pkl saved successfully.")
