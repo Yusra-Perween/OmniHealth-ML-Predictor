@@ -8,8 +8,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-# Load ML model
-model = load("health_model.pkl")
+# Load ML model efficiently using Streamlit caching
+@st.cache_resource
+def load_ml_model():
+    try:
+        return load("health_model.pkl")
+    except Exception as e:
+        st.error(f"⚠️ Critical Error: Could not load the machine learning model. Details: {e}")
+        return None
+
+model = load_ml_model()
 
 # App Title
 st.set_page_config(page_title="Arogya AI", layout="centered")
@@ -127,13 +135,16 @@ with tab1:
     st.subheader("🔍 Input Health Data")
     st.write(input_df)
 
-    prediction = model.predict(input_df)[0]
-
-    st.subheader("🧠 Diabetes Risk Prediction")
-    if prediction == 1:
-        st.error("⚠️ You may be at **risk of diabetes**. Please consult a doctor.")
+    if model is not None:
+        prediction = model.predict(input_df)[0]
+    
+        st.subheader("🧠 Diabetes Risk Prediction")
+        if prediction == 1:
+            st.error("⚠️ You may be at **risk of diabetes**. Please consult a doctor.")
+        else:
+            st.success("✅ You are likely **not at risk** of diabetes.")
     else:
-        st.success("✅ You are likely **not at risk** of diabetes.")
+        st.error("Prediction unavailable because the model failed to load.")
 
 # ⚠️ TAB 2: Early Disease Detection
 with tab2:
