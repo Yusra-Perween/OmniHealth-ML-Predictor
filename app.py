@@ -22,8 +22,8 @@ def load_ml_models():
 diabetes_model, heart_model = load_ml_models()
 
 # App Title
-st.set_page_config(page_title="Arogya AI", layout="centered")
-st.title("🩺 SmartRx - Your Personal Health Assistant")
+st.set_page_config(page_title="OmniHealth ML Predictor", layout="centered")
+st.title("🤖 OmniHealth ML Predictor")
 
 # Sidebar Disease Selector
 disease_type = st.sidebar.selectbox("Select Disease to Predict", ["Diabetes", "Heart Disease"])

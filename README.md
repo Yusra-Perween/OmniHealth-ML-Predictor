@@ -1,4 +1,4 @@
-# HealthAssist – Machine Learning Health Recommendation System
+# OmniHealth ML Predictor
 
 HealthAssist is a machine learning based project designed to analyze user health data
 and provide basic predictions related to common medical conditions. The goal of this
