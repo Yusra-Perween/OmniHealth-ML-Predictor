@@ -8,30 +8,30 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-# Load ML model efficiently using Streamlit caching
+# Load ML models efficiently using Streamlit caching
 @st.cache_resource
-def load_ml_model():
+def load_ml_models():
     try:
-        return load("models/health_model.pkl")
+        health_model = load("models/health_model.pkl")
+        heart_model = load("models/heart_model.pkl")
+        return health_model, heart_model
     except Exception as e:
-        st.error(f"⚠️ Critical Error: Could not load the machine learning model. Details: {e}")
-        return None
+        st.error(f"⚠️ Critical Error: Could not load the machine learning models. Details: {e}")
+        return None, None
 
-model = load_ml_model()
+diabetes_model, heart_model = load_ml_models()
 
 # App Title
 st.set_page_config(page_title="Arogya AI", layout="centered")
 st.title("🩺 SmartRx - Your Personal Health Assistant")
 
-# Sidebar Input Function
-def user_input_features():
-    """
-    Collects user health data via Streamlit sidebar inputs.
-    
-    Returns:
-        pd.DataFrame: A single-row DataFrame containing the collected features.
-    """
-    st.sidebar.header("📝 Enter Health Details")
+# Sidebar Disease Selector
+disease_type = st.sidebar.selectbox("Select Disease to Predict", ["Diabetes", "Heart Disease"])
+
+# Sidebar Input Functions
+def user_input_features_diabetes():
+    """Collects user health data for Diabetes prediction."""
+    st.sidebar.header("📝 Enter Diabetes Health Details")
     pregnancies = st.sidebar.number_input("Pregnancies", 0, 20, 1)
     glucose = st.sidebar.slider("Glucose Level", 0, 200, 100)
     blood_pressure = st.sidebar.slider("Blood Pressure", 0, 122, 70)
@@ -50,6 +50,40 @@ def user_input_features():
         'BMI': bmi,
         'DiabetesPedigreeFunction': dpf,
         'Age': age
+    }
+    return pd.DataFrame(data, index=[0])
+
+def user_input_features_heart():
+    """Collects user health data for Heart Disease prediction."""
+    st.sidebar.header("📝 Enter Heart Health Details")
+    age = st.sidebar.slider("Age", 20, 100, 50)
+    sex = st.sidebar.selectbox("Sex", ["Male", "Female"])
+    cp = st.sidebar.selectbox("Chest Pain Type", ["typical angina", "atypical angina", "non-anginal", "asymptomatic"])
+    trestbps = st.sidebar.slider("Resting Blood Pressure", 80, 200, 120)
+    chol = st.sidebar.slider("Cholesterol", 100, 600, 200)
+    fbs = st.sidebar.selectbox("Fasting Blood Sugar > 120 mg/dl", [True, False])
+    restecg = st.sidebar.selectbox("Resting ECG", ["normal", "lv hypertrophy", "st-t abnormality"])
+    thalch = st.sidebar.slider("Max Heart Rate Achieved", 60, 220, 150)
+    exang = st.sidebar.selectbox("Exercise Induced Angina", [True, False])
+    oldpeak = st.sidebar.slider("ST Depression (oldpeak)", 0.0, 6.0, 1.0)
+    slope = st.sidebar.selectbox("Slope of Peak ST Segment", ["downsloping", "flat", "upsloping"])
+    ca = st.sidebar.slider("Number of Major Vessels (ca)", 0, 4, 0)
+    thal = st.sidebar.selectbox("Thalassemia", ["normal", "fixed defect", "reversable defect"])
+
+    data = {
+        'age': age,
+        'sex': sex,
+        'cp': cp,
+        'trestbps': trestbps,
+        'chol': chol,
+        'fbs': str(fbs).upper(),
+        'restecg': restecg,
+        'thalch': thalch,
+        'exang': str(exang).upper(),
+        'oldpeak': oldpeak,
+        'slope': slope,
+        'ca': ca,
+        'thal': thal
     }
     return pd.DataFrame(data, index=[0])
 
@@ -128,96 +162,123 @@ def suggest_diet(glucose, bmi):
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Prediction", "🧠 Early Detection", "🍽️ Diet", "📊 Dashboard", "📜 History"])
 
 # Get input
-input_df = user_input_features()
+if disease_type == "Diabetes":
+    input_df = user_input_features_diabetes()
+else:
+    input_df = user_input_features_heart()
 
-# 🔍 TAB 1: Diabetes Prediction
+# 🔍 TAB 1: Disease Prediction
 with tab1:
-    st.subheader("🔍 Input Health Data")
+    st.subheader(f"🔍 Input {disease_type} Data")
     st.write(input_df)
 
-    if model is not None:
-        prediction = model.predict(input_df)[0]
-    
-        st.subheader("🧠 Diabetes Risk Prediction")
-        if prediction == 1:
-            st.error("⚠️ You may be at **risk of diabetes**. Please consult a doctor.")
+    if disease_type == "Diabetes":
+        if diabetes_model is not None:
+            prediction = diabetes_model.predict(input_df)[0]
+        
+            st.subheader("🧠 Diabetes Risk Prediction")
+            if prediction == 1:
+                st.error("⚠️ You may be at **risk of diabetes**. Please consult a doctor.")
+            else:
+                st.success("✅ You are likely **not at risk** of diabetes.")
         else:
-            st.success("✅ You are likely **not at risk** of diabetes.")
+            st.error("Prediction unavailable because the diabetes model failed to load.")
     else:
-        st.error("Prediction unavailable because the model failed to load.")
+        if heart_model is not None:
+            prediction = heart_model.predict(input_df)[0]
+        
+            st.subheader("🫀 Heart Disease Risk Prediction")
+            if prediction == 1:
+                st.error("⚠️ You may be at **risk of heart disease**. Please consult a doctor.")
+            else:
+                st.success("✅ You are likely **not at risk** of heart disease.")
+        else:
+            st.error("Prediction unavailable because the heart model failed to load.")
 
 # ⚠️ TAB 2: Early Disease Detection
 with tab2:
-    st.subheader("⚠️ Early Disease Risk Report")
-    result = detect_early_disease(input_df)
-    if "No immediate" in result:
-        st.success(result)
+    if disease_type == "Diabetes":
+        st.subheader("⚠️ Early Disease Risk Report")
+        result = detect_early_disease(input_df)
+        if "No immediate" in result:
+            st.success(result)
+        else:
+            st.warning(result)
     else:
-        st.warning(result)
+        st.info("Early disease risk report is currently optimized for Diabetes inputs.")
 
 # 🍽️ TAB 3: Smart Diet Suggestion
 with tab3:
-    st.subheader("🍽️ Smart Diet Suggestions")
-    diet = suggest_diet(input_df['Glucose'][0], input_df['BMI'][0])
-    for tip in diet:
-        st.markdown(f"- {tip}")
+    if disease_type == "Diabetes":
+        st.subheader("🍽️ Smart Diet Suggestions")
+        diet = suggest_diet(input_df['Glucose'][0], input_df['BMI'][0])
+        for tip in diet:
+            st.markdown(f"- {tip}")
+    else:
+        st.info("Smart diet suggestions are currently optimized for Diabetes inputs.")
 
 # 📊 TAB 4: Health Insights Dashboard
 with tab4:
     st.title("📊 Health Insights Dashboard")
 
-    try:
-        df = pd.read_csv("data/health_data.csv")
-
-        st.markdown("### 📌 Dataset Overview")
-        st.dataframe(df.head())
-
-        # Histogram for each metric
-        st.markdown("### 📊 Distribution Charts")
-        metrics = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'Age']
-        for metric in metrics:
-            fig = px.histogram(df, x=metric, nbins=30, title=f"{metric} Distribution", color_discrete_sequence=['indianred'])
+    if disease_type == "Diabetes":
+        try:
+            df = pd.read_csv("data/health_data.csv")
+    
+            st.markdown("### 📌 Dataset Overview")
+            st.dataframe(df.head())
+    
+            # Histogram for each metric
+            st.markdown("### 📊 Distribution Charts")
+            metrics = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'Age']
+            for metric in metrics:
+                fig = px.histogram(df, x=metric, nbins=30, title=f"{metric} Distribution", color_discrete_sequence=['indianred'])
+                st.plotly_chart(fig)
+    
+            # Correlation heatmap
+            st.markdown("### 🔗 Correlation Heatmap")
+            corr = df.corr()
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
+            st.pyplot(fig)
+    
+            # Glucose trend across age group
+            st.markdown("### 📈 Avg Glucose by Age Group")
+            df['AgeGroup'] = pd.cut(df['Age'], bins=[20, 30, 40, 50, 60, 100], labels=["21-30", "31-40", "41-50", "51-60", "61+"])
+            avg_glucose = df.groupby('AgeGroup')['Glucose'].mean().reset_index()
+            fig = px.line(avg_glucose, x='AgeGroup', y='Glucose', markers=True, title="Avg Glucose vs Age Group")
             st.plotly_chart(fig)
-
-        # Correlation heatmap
-        st.markdown("### 🔗 Correlation Heatmap")
-        corr = df.corr()
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax)
-        st.pyplot(fig)
-
-        # Glucose trend across age group
-        st.markdown("### 📈 Avg Glucose by Age Group")
-        df['AgeGroup'] = pd.cut(df['Age'], bins=[20, 30, 40, 50, 60, 100], labels=["21-30", "31-40", "41-50", "51-60", "61+"])
-        avg_glucose = df.groupby('AgeGroup')['Glucose'].mean().reset_index()
-        fig = px.line(avg_glucose, x='AgeGroup', y='Glucose', markers=True, title="Avg Glucose vs Age Group")
-        st.plotly_chart(fig)
-
-        # Scatter plots
-        st.markdown("### 🔁 Scatter Plots")
-        col1, col2 = st.columns(2)
-        with col1:
-            fig = px.scatter(df, x='Glucose', y='Insulin', color='Outcome', title="Glucose vs Insulin")
+    
+            # Scatter plots
+            st.markdown("### 🔁 Scatter Plots")
+            col1, col2 = st.columns(2)
+            with col1:
+                fig = px.scatter(df, x='Glucose', y='Insulin', color='Outcome', title="Glucose vs Insulin")
+                st.plotly_chart(fig)
+            with col2:
+                fig = px.scatter(df, x='BMI', y='Age', color='Outcome', title="BMI vs Age")
+                st.plotly_chart(fig)
+    
+            # Diabetes outcome by age group
+            st.markdown("### 🧑‍⚕️ Diabetes Count by Age Group")
+            outcome_count = df.groupby(['AgeGroup', 'Outcome']).size().reset_index(name='Count')
+            fig = px.bar(outcome_count, x='AgeGroup', y='Count', color='Outcome', barmode='group', title="Diabetes Outcome by Age Group")
             st.plotly_chart(fig)
-        with col2:
-            fig = px.scatter(df, x='BMI', y='Age', color='Outcome', title="BMI vs Age")
-            st.plotly_chart(fig)
-
-        # Diabetes outcome by age group
-        st.markdown("### 🧑‍⚕️ Diabetes Count by Age Group")
-        outcome_count = df.groupby(['AgeGroup', 'Outcome']).size().reset_index(name='Count')
-        fig = px.bar(outcome_count, x='AgeGroup', y='Count', color='Outcome', barmode='group', title="Diabetes Outcome by Age Group")
-        st.plotly_chart(fig)
-
-    except Exception as e:
-        st.error(f"⚠️ Unable to load data: {e}")
+    
+        except Exception as e:
+            st.error(f"⚠️ Unable to load data: {e}")
+    else:
+        st.info("Advanced dashboard visualizations for Heart Disease are coming soon.")
 
 # 📜 TAB 5: History
 with tab5:
     st.subheader("📜 Your Last 10 Records")
-    try:
-        save_history(input_df.iloc[0].to_dict())
-        history_df = pd.read_csv("data/health_history.csv")
-        st.dataframe(history_df.tail(10))
-    except Exception as e:
-        st.warning("No history found or error reading file.")
+    if disease_type == "Diabetes":
+        try:
+            save_history(input_df.iloc[0].to_dict())
+            history_df = pd.read_csv("data/health_history.csv")
+            st.dataframe(history_df.tail(10))
+        except Exception as e:
+            st.warning("No history found or error reading file.")
+    else:
+        st.info("History tracking for Heart Disease is coming soon.")
