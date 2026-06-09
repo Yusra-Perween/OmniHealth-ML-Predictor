@@ -1,13 +1,11 @@
 # OmniHealth ML Predictor
 
-HealthAssist is a machine learning based project designed to analyze user health data
-and provide basic predictions related to common medical conditions. The goal of this
-project is to demonstrate the practical application of ML models in healthcare.
+OmniHealth ML Predictor is a sophisticated machine learning-based application designed to analyze user health data and provide accurate early-warning predictions for common medical conditions such as Diabetes and Heart Disease. The goal of this project is to demonstrate the practical, end-to-end application of Machine Learning models in modern healthcare systems.
 
 ## Project Objectives
-- To apply machine learning techniques on health-related datasets
-- To predict possible medical conditions based on input features
-- To provide a simple and understandable health recommendation workflow
+- To apply advanced machine learning techniques on complex health-related datasets
+- To predict possible medical conditions based on dynamic user input features
+- To provide a simple and understandable health recommendation workflow with visual insights
 
 ## Key Features
 - ML-based disease prediction
@@ -36,6 +34,11 @@ project is to demonstrate the practical application of ML models in healthcare.
 
 2. Run the application  
    `streamlit run app.py`
+
+## Future Enhancements
+- Integration with cloud-based database architectures (e.g., AWS, Firebase) for persistent patient history storage.
+- Real-time deployment via Docker and cloud hosting platforms.
+- Addition of predictive models for other conditions like chronic kidney disease.
 
 ## Note
 This project is created for learning and academic purposes and is not intended
