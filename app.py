@@ -282,3 +282,7 @@ with tab5:
             st.warning("No history found or error reading file.")
     else:
         st.info("History tracking for Heart Disease is coming soon.")
+
+# Footer
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: grey;'>Built with ❤️ | OmniHealth ML Predictor</p>", unsafe_allow_html=True)
