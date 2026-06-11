@@ -167,6 +167,9 @@ if disease_type == "Diabetes":
 else:
     input_df = user_input_features_heart()
 
+st.sidebar.markdown("---")
+st.sidebar.info("Adjust the parameters above and check the prediction tabs.")
+
 # 🔍 TAB 1: Disease Prediction
 with tab1:
     st.subheader(f"🔍 Input {disease_type} Data")
